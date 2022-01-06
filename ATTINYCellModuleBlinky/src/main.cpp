@@ -23,10 +23,10 @@ void setup()
 
   //DDRA – Port A Data Direction Register
   //When DDAn is set, the pin PAn is configured as an output. When DDAn is cleared, the pin is configured as an input
-  DDRA |= _BV(DDA3) | _BV(DDA6) | _BV(DDA7) | _BV(DDA5);
+  DDRA |= _BV(DDA1) | _BV(DDA6) | _BV(DDA7);
   //DDRB – Port B Data Direction Register
   //Spare pin is output
-  DDRB |= _BV(DDB1);
+  DDRB |= _BV(DDB2);
 
   //Set the extra high sink capability of pin PA7 is enabled.
   PHDE |= _BV(PHDEA1);
@@ -35,9 +35,18 @@ void setup()
 void loop()
 {
   PORTA |= _BV(PORTA6);
-  PORTA |= _BV(PORTA5);
+  PORTA |= _BV(PORTA1);
+  delay(10);
+  if(PINA & _BV(PORTA2)) {
+    PORTB |= _BV(PORTB2);
+  }
+  
   delay(1000);
   PORTA &= (~_BV(PORTA6));
-  PORTA &= (~_BV(PORTA5));
+  PORTA &= (~_BV(PORTA1));
+  
+  if(PINA & _BV(PORTA2)) {
+    PORTB &= (~_BV(PORTB2));
+  }
   delay(1000);
 }
