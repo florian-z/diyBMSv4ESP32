@@ -48,9 +48,13 @@ void setup()
 
 void loop()
 {
+  delay(4000);
   LED_BLU_ON
+  delay(4000);
+  REFVOLT_ON
+  delay(4000);
   SET_TX
-  delay(1);
+  delay(4000);
   if(READ_RX) {
     LED_RED_ON
   }
@@ -59,6 +63,7 @@ void loop()
 
   LED_BLU_OFF
   CLR_TX
+  REFVOLT_OFF
   delay(1);
   if(!READ_RX) {
     LED_RED_OFF;
