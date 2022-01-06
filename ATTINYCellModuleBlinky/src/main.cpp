@@ -1,20 +1,34 @@
-//USING CLOCKWISE PIN MAPPINGS
-#define dump_enable 3
-#define green_led 6
-#define blue_led 5
-#define enable_2048 7
-
 #include <Arduino.h>
+//USING CLOCKWISE PIN MAPPINGS
+
+// A1 - TX
+// A6 - LED BLUE
+// A7 - REF. VOLTAGE
+// B2 - LED RED
+#define LED_BLU_ON PORTA |= _BV(PORTA6);
+#define LED_RED_ON PORTB |= _BV(PORTB2);
+#define REFVOLT_ON PORTA |= _BV(PORTA7);
+#define LED_BLU_OFF PORTA &= (~_BV(PORTA6));
+#define LED_RED_OFF PORTB &= (~_BV(PORTB2));
+#define REFVOLT_OFF PORTA &= (~_BV(PORTA7));
+#define READ_RX (PINA & _BV(PORTA2))
+#define SET_TX PORTA |= _BV(PORTA1);
+#define CLR_TX PORTA &= (~_BV(PORTA1));
+
 
 void setup()
 {
-  //Boot up will be in 1Mhz CKDIV8 mode, swap to /4 to change speed to 2Mhz
+  /* 
+   * Boot up will be in 1Mhz CKDIV8 mode from external 8MHz crystal. Swap to /4 to change speed to 2Mhz.
+   * Below 2Mhz is required for running ATTINY at low voltages (less than 2V)
+   */
   //CCP – Configuration Change Protection Register
+  // protected: CLKPR, MCUCR, WDTCSR
   CCP = 0xD8;
   //CLKPR – Clock Prescale Register
   CLKPR = _BV(CLKPS1);
-
-  //below 2Mhz is required for running ATTINY at low voltages (less than 2V)
+  // 2MHz clock ...
+  
 
   //PUEA – Port A Pull-Up Enable Control Register (All disabled)
   PUEA = 0;
@@ -34,19 +48,20 @@ void setup()
 
 void loop()
 {
-  PORTA |= _BV(PORTA6);
-  PORTA |= _BV(PORTA1);
-  delay(10);
-  if(PINA & _BV(PORTA2)) {
-    PORTB |= _BV(PORTB2);
+  LED_BLU_ON
+  SET_TX
+  delay(1);
+  if(READ_RX) {
+    LED_RED_ON
   }
-  
   delay(1000);
-  PORTA &= (~_BV(PORTA6));
-  PORTA &= (~_BV(PORTA1));
-  
-  if(PINA & _BV(PORTA2)) {
-    PORTB &= (~_BV(PORTB2));
+
+
+  LED_BLU_OFF
+  CLR_TX
+  delay(1);
+  if(!READ_RX) {
+    LED_RED_OFF;
   }
   delay(1000);
 }
