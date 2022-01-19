@@ -20,11 +20,9 @@ void pwrmgmt_sleep_idle() {
 }
 
 void pwrmgmt_sleep_adcnoisereduction() {
-  LED_BLU_ON
   MCUCR = _BV(SE) | _BV(SM0); // enable sleep instruction, select ADC-noise-reduction
   __builtin_avr_sleep(); // start sleep (sleep instruction)
   MCUCR &= ~_BV(SE); // disable sleep instruction
-  LED_BLU_OFF
 
   //ADC Noise Reduction Mode
   //This sleep mode halts clkI/O, clkCPU, and clkFLASH, while allowing other clocks to run. In ADC Noise Reduction mode, the

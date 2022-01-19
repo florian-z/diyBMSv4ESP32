@@ -33,7 +33,6 @@
 static bool adc_active = false;
 
 void init_adc() {
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     REFVOLT_ON;
     _delay_us(100); // wait until AREF stabilizes
     ADCSRA |= _BV(ADEN); // activate ADC module
@@ -50,15 +49,12 @@ void init_adc() {
     //ADCSRA |= _BV(ADSC); // start conversion
 
     adc_active = true;
-  }
 }
 
 void deinit_adc() {
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     adc_active = false;
     ADCSRA &= ~_BV(ADEN); // deactivate ADC module  
     REFVOLT_OFF;
-  }
 }
 
 uint16_t read_adc() {
@@ -95,7 +91,7 @@ uint16_t read_adc_channel(adc_chan_t channel) {
 
   ADCSRA |= _BV(ADIF); // clear any pending interrupt flag
   ADCSRA |= _BV(ADSC); // start conversion
-  pwrmgmt_sleep_adcnoisereduction();
+  //pwrmgmt_sleep_adcnoisereduction(); // todo this breaks UART RX/TX via interrupt
 
   while(ADCSRA & _BV(ADSC)); // wait until adc conversion done
   ADCSRA |= _BV(ADIF); // clear adc complete flag

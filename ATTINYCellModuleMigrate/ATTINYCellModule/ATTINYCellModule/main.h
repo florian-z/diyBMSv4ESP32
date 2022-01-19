@@ -23,4 +23,6 @@
 #define SET_TX PORTA |= _BV(PORTA1);
 #define CLR_TX PORTA &= (~_BV(PORTA1));
 
+void incoming_msg(const uint8_t * const msg, const uint8_t len);
+
 #endif
