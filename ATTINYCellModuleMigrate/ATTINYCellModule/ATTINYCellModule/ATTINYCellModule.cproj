@@ -179,6 +179,12 @@
     <Compile Include="util\adc.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="util\eeprom.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="util\eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="util\pwrmgmt.c">
       <SubType>compile</SubType>
     </Compile>

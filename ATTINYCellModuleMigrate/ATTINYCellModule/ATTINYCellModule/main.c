@@ -11,10 +11,7 @@
 
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-#include <avr/eeprom.h>
-#include <avr/power.h> // power consumption
-#include <avr/sleep.h> // power consumption
-#include <avr/cpufunc.h> // nop, ccp-register
+
 
 //#include <avr/boot.h>
 //USING CLOCKWISE PIN MAPPINGS
@@ -23,6 +20,7 @@
 #include "pwrmgmt.h"
 #include "uart.h"
 #include "steinhart.h"
+#include "eeprom.h"
 
 void setup();
 void loop_test_blinky();
@@ -150,12 +148,24 @@ void loop_test_adc() {
   	  voltage *= 3.5185185;
 	  }
   
-	  char data[100] = {0};
-	  snprintf(data, 100, "%d %.2f %.3fV\n", i, adc_result, voltage);
-	  send_tx0(data);
+    char data[100] = {0};
+    if(AREF == i || BATT == i) {
+	    snprintf(data, 100, "%d %.2f %.3fV\n", i, adc_result, voltage);
+    } else {
+      snprintf(data, 100, "%d %.2f %.3fV %dC\n", i, adc_result, voltage, thermistorToCelcius(3950, adc_result));
+    }
+    send_tx0(data);
   }
   deinit_adc();
   send_tx0("\n");
   
+  //_delay_ms(1000);
+  
+  //set_config(VOLT_CALIB, 1234);
+  //_delay_ms(1000);
+  char data[100] = {0};
+  snprintf(data, 100, "EEPROM %d %04X\n", get_config(VOLT_CALIB), get_config(VOLT_CALIB));
+  send_tx0(data);
   _delay_ms(1000);
+  
 }
