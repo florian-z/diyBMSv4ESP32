@@ -2,10 +2,10 @@
 #include "main.h"
 #include <avr/eeprom.h>
 
-static EEMEM uint16_t volt_calib;
+static EEMEM float volt_calib;
 
-uint16_t get_config(configs_t config) {
-  uint16_t* read_ptr;
+float get_config(configs_t config) {
+  float* read_ptr;
   switch(config) {
     case VOLT_CALIB:
       read_ptr = &volt_calib;
@@ -14,8 +14,8 @@ uint16_t get_config(configs_t config) {
   return eeprom_read_word(read_ptr);
 }
 
-void set_config(configs_t config, uint16_t value) {
-  uint16_t* write_ptr;
+void set_config(configs_t config, float value) {
+  float* write_ptr;
   switch(config) {
     case VOLT_CALIB:
     write_ptr = &volt_calib;

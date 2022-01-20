@@ -28,13 +28,15 @@ void setup();
 void loop_test_blinky();
 void loop_test_uart();
 void loop_test_adc();
+void loop();
 
 int main(void) {
   setup();
   while(1) {
-  //loop_test_blinky();
-	//loop_test_uart();
-	//loop_test_adc();
+    //loop_test_blinky();
+	  //loop_test_uart();
+	  //loop_test_adc();
+    loop();
   }
 }
 
@@ -132,9 +134,6 @@ ISR(BADISR_vect) {
   }
 }
 
-
-
-
 // printf %f needs linker library printf_flt (huge size)
 void loop_test_adc() {
   
@@ -147,7 +146,7 @@ void loop_test_adc() {
 	  // ADC = Vin * 1024 / Vref
 	  float volt_calib = 1.25 / 1023.0; // 0x03FF is VREF minus one LSB
 	  float voltage = adc_result * volt_calib;
-	
+    
 	  if(BATT == i) {
   	  voltage *= 3.5185185;
 	  }
@@ -169,12 +168,11 @@ void loop_test_adc() {
   //set_config(VOLT_CALIB, 1234);
   //_delay_ms(1000);
   char data[100] = {0};
-  snprintf(data, 100, "EEPROM %d %04X\n", get_config(VOLT_CALIB), get_config(VOLT_CALIB));
+  snprintf(data, 100, "EEPROM %f\n", get_config(VOLT_CALIB));
   //send_tx0(data);
   outgoing_msg(data, strlen(data));
   //_delay_ms(1000);
 }
-
 
 #include <string.h>
 
@@ -190,36 +188,22 @@ void incoming_msg(const uint8_t * const msg, const uint8_t len) {
   outgoing_msg(msg, len);
 }
 
+static uint16_t identify_module = 0;
 
-//void loop() {
-  //if(new_msg_in) {
-    // todo: check crc
-    //// check module counter
-    //if(!msg_in->mod_cnt) {
-      //// already processed -> pass through
-      //outgoing_msg(msg_in);
-      //continue;
-    //}
-    //msg_in->mod_cnt--;
-    //if(msg_in->mod_cnt) {
-      //// recipient is further down the line -> pass through
-      //outgoing_msg(msg_in);
-      //continue;
-    //} else {
-      //// message is for this module -> process message
-      //switch(command) {
-        //case GET_BATT_VOLT:
-          //break;
-        //case GET_TEMP1:
-          //break;
-        //case GET_TEMP2:
-          //break;
-        //case SET_BATT_VOLT_CALIB:
-          //break;
-        //case IDENTIFY_MODULE:
-          //break;
-      //}
-      //outgoing_msg(msg_out);
-    //}
-  //}
-//}
+void set_identify_module() {
+  identify_module = 12;
+  LED_RED_ON
+}
+
+void loop() {
+  if(identify_module) {
+    identify_module--;
+    LED_RED_ON
+    _delay_ms(50);
+    LED_RED_OFF
+    _delay_ms(50);
+    
+  } else {
+    // todo: sleep()
+  }
+}

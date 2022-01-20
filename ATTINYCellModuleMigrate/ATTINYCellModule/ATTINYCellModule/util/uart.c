@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "main.h"
 #include <string.h>
+#include "process_messages.h"
 
 void putc_tx0(const uint8_t singlebyte) {
 	while(!(UCSR0A & _BV(UDRE0)));
@@ -15,13 +16,13 @@ void send_tx0(const uint8_t* string) {
   while(!(UCSR0A & _BV(TXC0))); // busy wait until last character is fully sent
 }
 
-#define MSG_START '$'
-#define MSG_END '\n'
+
 
 #define RX_BUF_LEN 100
 #define TX_BUF_LEN 100
 static volatile uint8_t rx_data[RX_BUF_LEN] = {0};
 static volatile uint8_t rx_n = 0;
+static volatile uint8_t rx_crc = 0;
 void clear_rx_buffer() {
   memset(rx_data, 0, RX_BUF_LEN);
   rx_n = 0;
@@ -39,10 +40,13 @@ ISR(USART0_RX_vect) {
     const uint8_t data = UDR0;
     rx_data[rx_n++] = data;
 
-    if (MSG_END == data) {  
+    if (MSG_END == data) {
       // received msg end, process msg
-      incoming_msg(rx_data, rx_n);
+      LED_BLU_ON
+      //incoming_msg(rx_data, rx_n);
+      process_message(rx_data);
       clear_rx_buffer();
+      LED_BLU_OFF
 
     } else if(MSG_START == data) {
       // received msg start, start over

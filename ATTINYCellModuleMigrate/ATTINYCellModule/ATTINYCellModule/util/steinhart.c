@@ -1,7 +1,7 @@
 #include "steinhart.h"
 #include "main.h"
 
-int16_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc) {
+int8_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc) {
 //The thermistor is connected in series with another 47k resistor
 //and across the 2.048V reference giving 50:50 weighting
 
@@ -32,7 +32,7 @@ int16_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc) {
     //Temp = 1.0 / (A + (B*Temp) + (C * Temp * Temp * Temp ));
  }
 
- return (int16_t)-999;
+ return (int8_t)-99;
 }
 
 //This function reduces the scale of temperatures from int16_t type to a single byte (unsigned)

@@ -25,4 +25,6 @@
 
 void incoming_msg(const uint8_t * const msg, const uint8_t len);
 
+void set_identify_module();
+
 #endif

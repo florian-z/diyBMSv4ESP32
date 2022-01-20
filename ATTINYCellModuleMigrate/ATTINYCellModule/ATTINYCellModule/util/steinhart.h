@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-int16_t thermistorToCelcius(uint16_t b_coeff, uint16_t raw_adc);
-uint8_t temperatureToByte(int16_t tempInCelcius);
+int8_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc);
+//uint8_t temperatureToByte(int16_t tempInCelcius);
 
 #endif
