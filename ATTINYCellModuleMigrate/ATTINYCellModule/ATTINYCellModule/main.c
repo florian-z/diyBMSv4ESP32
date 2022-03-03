@@ -42,6 +42,9 @@ int main(void) {
 }
 
 void setup() {
+  wdt_enable(WDTO_8S);
+  WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
+  
   /* 
    * Boot up will be in 1Mhz CKDIV8 mode from external 8MHz crystal. Swap to /4 to change speed to 2Mhz.
    * Below 2Mhz is required for running ATTINY at low voltages (less than 2V)
@@ -83,6 +86,7 @@ void setup() {
   // set baudrate
   UBRR0L = 12; // 9600 baud @ 2MHz
   
+  __builtin_avr_wdr();
   __builtin_avr_sei();
 }
 
@@ -192,17 +196,23 @@ void incoming_msg(const uint8_t * const msg, const uint8_t len) {
 }
 
 static uint8_t flag_identify_module = 0;
-static uint8_t flag_go_sleeping = 0;
-static uint8_t flag_transfer_done = 0;
+static uint8_t flag_go_deepsleep = 0;
+static uint8_t flag_processing_done = 0;
 
 void set_identify_module() {
   flag_identify_module = 16;
 }
-void set_go_sleeping() {
-  flag_go_sleeping = 1;
-}  
-void set_transfer_done() {
-  flag_transfer_done = 1;
+void set_disable_deepsleep() {
+  flag_go_deepsleep = 0;
+}
+void set_enable_deepsleep() {
+  flag_go_deepsleep = 1;
+}
+void set_processing_start() {
+  flag_processing_done = 0;
+}
+void set_processing_done() {
+  flag_processing_done = 1;
 }
 
 
@@ -210,6 +220,7 @@ void go_sleep_idle();
 void go_sleep_powerdown();
 
 void loop() {
+  __builtin_avr_wdr();
   if(flag_identify_module) {
     flag_identify_module--;
     LED_RED_ON
@@ -218,11 +229,11 @@ void loop() {
     _delay_ms(50);
     
   // "else if" will ensure, that identify module has priority over sleep
-  } else if (flag_transfer_done) {
-    flag_transfer_done = 0;
-    if (flag_go_sleeping) {
-      flag_go_sleeping = 0;
+  } else if (flag_processing_done) {
+    if (flag_go_deepsleep) {
       go_sleep_powerdown();
+    } else {
+      go_sleep_idle();
     }
   } else {
     go_sleep_idle();
@@ -232,13 +243,20 @@ void loop() {
 void go_sleep_idle() {
   deinit_adc();
   LED_RED_OFF
-  LED_BLU_OFF
+  LED_BLU_ON
   pwrmgmt_sleep_idle();
+  LED_BLU_OFF
 }
 
 void go_sleep_powerdown() {
   deinit_adc();
-  LED_RED_OFF
+  LED_RED_ON
   LED_BLU_OFF
   pwrmgmt_sleep_standby(); // oscillator will keep running, otherwise mcu startup is too slow to get the next incoming message
+  LED_RED_OFF
+}
+
+/* Watchdog Time-out Interrupt */
+ISR(WDT_vect) {
+  WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
 }

@@ -29,10 +29,13 @@ void clear_rx_buffer() {
 }
 
 /* USART0, Start-Bit */
-EMPTY_INTERRUPT(USART0_START_vect)
+ISR(USART0_START_vect) {
+  set_processing_start();
+}
 
 /* USART0, Rx Complete */
 ISR(USART0_RX_vect) {
+  set_processing_start();
   // check parity
   if(UCSR0A & _BV(UPE0)) {
     // parity error
@@ -99,5 +102,5 @@ ISR(USART0_UDRE_vect) {
 /* USART0, Tx Complete */
 ISR(USART0_TX_vect) {
   UCSR0B &= ~_BV(TXCIE0); // disable TX0 TransferComplete interrupt
-  set_transfer_done();
+  set_processing_done();
 }

@@ -26,7 +26,9 @@
 void incoming_msg(const uint8_t * const msg, const uint8_t len);
 
 void set_identify_module();
-void set_go_sleeping();
-void set_transfer_done();
+void set_disable_deepsleep();
+void set_enable_deepsleep();
+void set_processing_start();
+void set_processing_done();
 
 #endif

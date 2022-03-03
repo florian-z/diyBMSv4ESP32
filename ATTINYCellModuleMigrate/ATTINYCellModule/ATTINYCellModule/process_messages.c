@@ -123,6 +123,7 @@ void process_message(uint8_t* const msg) {
     if(!is_msg_syntax_valid(msg)) {
       // message has invalid syntax or crc
       LED_RED_ON
+      set_processing_done();
       return;
     }
     // message has valid syntax and crc
@@ -136,6 +137,8 @@ void process_message(uint8_t* const msg) {
       *ptr++ = '\0'; // <crc2>
       *ptr = '\0';   //'\n'
     }
+
+    set_disable_deepsleep();
 
     // process message
     uint8_t command = parse_chars_to_byte(&msg[MSG_CMD]);
@@ -166,7 +169,7 @@ void process_message(uint8_t* const msg) {
         break;
         
       case ACTIVATE_POWERSAFE:
-        set_go_sleeping();
+        set_enable_deepsleep();
         break;
     }
     
