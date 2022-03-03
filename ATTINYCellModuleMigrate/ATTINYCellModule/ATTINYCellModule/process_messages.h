@@ -15,7 +15,7 @@
 #define MSG_CRC '*'
 #define MSG_END '\n'
 
-typedef enum msg_command { GET_BATT_VOLT=0, GET_TEMP=1, IDENTIFY_MODULE=2, SET_BATT_VOLT_CALIB=3 } msg_command_t;
+typedef enum msg_command { GET_BATT_VOLT=0, GET_TEMP=1, SET_BATT_VOLT_CALIB=2, IDENTIFY_MODULE=3, ACTIVATE_POWERSAFE=4 } msg_command_t;
 
 uint8_t calc_crc(const uint8_t* msg);
 bool is_msg_syntax_valid(const uint8_t* const msg);

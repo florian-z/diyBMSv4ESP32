@@ -90,9 +90,9 @@ void msg_add_crc_and_end(uint8_t* msg) {
 bool is_msg_syntax_valid(const uint8_t* const msg) {
   const uint8_t* ptr = msg;
   // check first byte is MSG_START
-  //if(MSG_START != *ptr) {
-    //return false;
-  //}
+  if(MSG_START != *ptr) {
+    return false;
+  }  
   
   // check message contains MSG_CRC
   while(*ptr && MSG_CRC != *ptr) {
@@ -122,7 +122,7 @@ void process_message(uint8_t* const msg) {
   //if(new_msg_in) {
     if(!is_msg_syntax_valid(msg)) {
       // message has invalid syntax or crc
-      // todo sleep idle
+      LED_RED_ON
       return;
     }
     // message has valid syntax and crc
@@ -163,6 +163,10 @@ void process_message(uint8_t* const msg) {
           // message is for this module -> identify
           set_identify_module();
         }
+        break;
+        
+      case ACTIVATE_POWERSAFE:
+        set_go_sleeping();
         break;
     }
     

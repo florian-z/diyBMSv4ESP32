@@ -28,6 +28,10 @@ void clear_rx_buffer() {
   rx_n = 0;
 }
 
+/* USART0, Start-Bit */
+EMPTY_INTERRUPT(USART0_START_vect)
+
+/* USART0, Rx Complete */
 ISR(USART0_RX_vect) {
   // check parity
   if(UCSR0A & _BV(UPE0)) {
@@ -72,13 +76,14 @@ void outgoing_msg(const uint8_t * const msg, uint8_t len) {
   memcpy(tx_data, msg, len);
   tx_n = 0;
   tx_len = len;
-  UCSR0B |= _BV(UDRIE0); // enable TX0 interrupt
+  UCSR0B |= _BV(UDRIE0) | _BV(TXCIE0); // enable TX0 interrupts
 }
 
+/* USART0 Data Register Empty */
 ISR(USART0_UDRE_vect) {
   if (!tx_len) {
     // transmit done
-    UCSR0B &= ~_BV(UDRIE0); // disable TX0 interrupt
+    UCSR0B &= ~_BV(UDRIE0); // disable TX0 DataRegisterEmpty interrupt
     return;
   }
   UDR0 = tx_data[tx_n++];
@@ -91,3 +96,8 @@ ISR(USART0_UDRE_vect) {
   }
 }
 
+/* USART0, Tx Complete */
+ISR(USART0_TX_vect) {
+  UCSR0B &= ~_BV(TXCIE0); // disable TX0 TransferComplete interrupt
+  set_transfer_done();
+}

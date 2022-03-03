@@ -90,8 +90,8 @@ uint16_t read_adc_channel(adc_chan_t channel) {
   select_adc_channel(channel);
 
   ADCSRA |= _BV(ADIF); // clear any pending interrupt flag
-  ADCSRA |= _BV(ADSC); // start conversion
-  //pwrmgmt_sleep_adcnoisereduction(); // todo this breaks UART RX/TX via interrupt
+  //ADCSRA |= _BV(ADSC); // start conversion
+  pwrmgmt_sleep_adcnoisereduction(); // automatically starts ADC conversion
 
   while(ADCSRA & _BV(ADSC)); // wait until adc conversion done
   ADCSRA |= _BV(ADIF); // clear adc complete flag

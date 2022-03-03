@@ -32,6 +32,7 @@ void loop();
 
 int main(void) {
   setup();
+  set_identify_module();
   while(1) {
     //loop_test_blinky();
 	  //loop_test_uart();
@@ -75,7 +76,9 @@ void setup() {
   
   // todo: // wake up mcu from all sleep modes on incoming RX-data
   // note: UCSR0D = UCSR0D | _BV(RXS0); // needs to be cleared by writing a logical one
-  //UCSR0D = _BV(RXSIE0) | _BV(SFDE0); // non-default: RXSIE0, SFDE0
+  UCSR0D = _BV(RXSIE0) | _BV(SFDE0); // non-default: RXSIE0, SFDE0
+  
+  
   
   // set baudrate
   UBRR0L = 12; // 9600 baud @ 2MHz
@@ -188,22 +191,54 @@ void incoming_msg(const uint8_t * const msg, const uint8_t len) {
   outgoing_msg(msg, len);
 }
 
-static uint16_t identify_module = 0;
+static uint8_t flag_identify_module = 0;
+static uint8_t flag_go_sleeping = 0;
+static uint8_t flag_transfer_done = 0;
 
 void set_identify_module() {
-  identify_module = 12;
-  LED_RED_ON
+  flag_identify_module = 16;
+}
+void set_go_sleeping() {
+  flag_go_sleeping = 1;
+}  
+void set_transfer_done() {
+  flag_transfer_done = 1;
 }
 
+
+void go_sleep_idle();
+void go_sleep_powerdown();
+
 void loop() {
-  if(identify_module) {
-    identify_module--;
+  if(flag_identify_module) {
+    flag_identify_module--;
     LED_RED_ON
     _delay_ms(50);
     LED_RED_OFF
     _delay_ms(50);
     
+  // "else if" will ensure, that identify module has priority over sleep
+  } else if (flag_transfer_done) {
+    flag_transfer_done = 0;
+    if (flag_go_sleeping) {
+      flag_go_sleeping = 0;
+      go_sleep_powerdown();
+    }
   } else {
-    // todo: sleep()
+    go_sleep_idle();
   }
+}
+
+void go_sleep_idle() {
+  deinit_adc();
+  LED_RED_OFF
+  LED_BLU_OFF
+  pwrmgmt_sleep_idle();
+}
+
+void go_sleep_powerdown() {
+  deinit_adc();
+  LED_RED_OFF
+  LED_BLU_OFF
+  pwrmgmt_sleep_standby(); // oscillator will keep running, otherwise mcu startup is too slow to get the next incoming message
 }
