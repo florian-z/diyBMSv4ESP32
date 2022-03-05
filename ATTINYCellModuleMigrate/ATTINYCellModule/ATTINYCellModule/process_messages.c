@@ -6,35 +6,77 @@
 #include "uart.h"
 #include <string.h>
 
-uint16_t get_batt_millivolt() {
+/** Read config from EEPROM - Only overwrite default config values, if EEPROM is not all zero bytes */
+#define VOLT_CALIB_DEFAULT (1.25 / 1023.0) /* see get_batt_millivolt() */
+#define TEMP1_B_COEFF_DEFAULT 3950
+#define TEMP2_B_COEFF_DEFAULT 3950
+static float volt_calib = VOLT_CALIB_DEFAULT;
+static uint16_t temp1_b_coeff = TEMP1_B_COEFF_DEFAULT;
+static uint16_t temp2_b_coeff = TEMP2_B_COEFF_DEFAULT;
+void load_config_from_eeprom() {
+  float volt_calib_from_eeprom = get_config_voltcalib();
+  if (volt_calib_from_eeprom) {
+    volt_calib = volt_calib_from_eeprom;
+  } else {
+    volt_calib = VOLT_CALIB_DEFAULT;
+  }
+  
+  uint16_t temp_b_coeff_from_eeprom = get_config_temp1bcoeff();
+  if (temp_b_coeff_from_eeprom) {
+    temp1_b_coeff = temp_b_coeff_from_eeprom;
+  } else {
+    temp1_b_coeff = TEMP1_B_COEFF_DEFAULT;
+  }
+  
+  temp_b_coeff_from_eeprom = get_config_temp2bcoeff();
+  if (temp_b_coeff_from_eeprom) {
+    temp2_b_coeff = temp_b_coeff_from_eeprom;
+  } else {
+    temp2_b_coeff = TEMP2_B_COEFF_DEFAULT;
+  }
+}
+
+uint16_t get_batt_millivolt_uint16() {
   float adc_result = read_adc_channel_multiple(BATT, 10);
   // ADC = Vin * 1024 / Vref
-  static float volt_calib = 1.25 / 1023.0; // 0x03FF is VREF minus one LSB
-  //static float volt_calib = get_config(VOLT_CALIB);
+  // default value: 
+  //static float volt_calib = 1.25 / 1023.0; // 0x03FF is VREF minus one LSB
   float voltage = adc_result * volt_calib;
+  // *3.5185185 voltage divider
+  // *1000 mV/V
+  voltage *= 3518.5185;
+  return (uint16_t) voltage; // is millivolts
+}
+
+float get_batt_volt_float() {
+  float adc_result = read_adc_channel_multiple(BATT, 10);
+  // ADC = Vin * 1024 / Vref
+  // default value:
+  //static float volt_calib = 1.25 / 1023.0; // 0x03FF is VREF minus one LSB
+  float voltage = adc_result * volt_calib;
+  // *3.5185185 voltage divider
   voltage *= 3.5185185;
-  voltage *=1000;
-  return (uint16_t) voltage;
+  return voltage; // is volts
 }
 
 uint8_t get_temp1_degC() {
   float adc_result = read_adc_channel_multiple(TEMP1, 1);
   // ADC = Vin * 1024 / Vref
-  return (uint8_t) thermistorToCelcius(3950, adc_result);
+  return (uint8_t) thermistorToCelcius(temp1_b_coeff, adc_result);
 }
 
 uint8_t get_temp2_degC() {
   float adc_result = read_adc_channel_multiple(TEMP2, 1);
   // ADC = Vin * 1024 / Vref
-  return (uint8_t) thermistorToCelcius(3950, adc_result);
+  return (uint8_t) thermistorToCelcius(temp2_b_coeff, adc_result);
 }
 
-uint8_t parse_chars_to_byte(uint8_t* bytes) {
+uint8_t parse_chars_to_byte(const uint8_t* bytes) {
   uint8_t result = (bytes[0]-'0') * 16;
   result += bytes[1]-'0';
   return result;
 }
-uint16_t parse_chars_to_word(uint8_t* bytes) {
+uint16_t parse_chars_to_word(const uint8_t* bytes) {
   uint16_t result = (bytes[0]-'0') * 4096;
   result += (bytes[1]-'0') * 256;
   result += (bytes[2]-'0') * 16;
@@ -50,12 +92,18 @@ void format_word_to_chars(uint8_t* bytes, const uint16_t data) {
   bytes[1] = ((data%4096)/256)+'0';
   bytes[2] = ((data%256)/16)+'0';
   bytes[3] = (data%16)+'0';
-  //bytes[0] = (data/1000)+'0';
-  //bytes[1] = ((data%1000)/100)+'0';
-  //bytes[2] = ((data%100)/10)+'0';
-  //bytes[3] = (data%10)+'0';
 }
 
+void format_dword_to_chars(uint8_t* bytes, const uint32_t data) {
+  bytes[0] = (data/268435456)+'0';
+  bytes[1] = (data%268435456)/16777216+'0';
+  bytes[2] = (data%16777216)/1048576+'0';
+  bytes[3] = (data%1048576)/65536+'0';
+  bytes[4] = (data%65536)/4096+'0';
+  bytes[5] = ((data%4096)/256)+'0';
+  bytes[6] = ((data%256)/16)+'0';
+  bytes[7] = (data%16)+'0';
+}
 //void format_short_to_word(uint8_t* bytes, uint16_t shortval) {
   //bytes[0] = (shortval/1000)<<4 | (shortval%1000)/100;
   //bytes[1] = ((shortval%100)/10)<<4 | shortval%10;
@@ -145,20 +193,17 @@ void process_message(uint8_t* const msg) {
     uint8_t mod_cnt = parse_chars_to_byte(&msg[MSG_MOD_CNT]);
     switch(command) {
       case GET_BATT_VOLT:
-        format_word_to_chars(msg+5+mod_cnt*4, get_batt_millivolt());
+        // append value and send
+        format_word_to_chars(&msg[MSG_DATA_BEGIN]+mod_cnt*4, get_batt_millivolt_uint16());
+        // TODO check max message length
+        // TODO check static/dynamic RAM usage (512bytes max)
         break;
         
       case GET_TEMP:
-        format_word_to_chars(msg+5+mod_cnt*4, get_temp1_degC()*256+get_temp2_degC());
         // append value and send
-        break;
-        
-      case SET_BATT_VOLT_CALIB:
-        if (!mod_cnt) {
-          // message is for this module -> calc and store in eeprom
-          // todo;
-          set_identify_module();
-        }
+        format_word_to_chars(&msg[MSG_DATA_BEGIN]+mod_cnt*4, get_temp1_degC()*256+get_temp2_degC());
+        // TODO check max message length
+        // TODO check static/dynamic RAM usage (512bytes max)
         break;
         
       case IDENTIFY_MODULE:
@@ -170,6 +215,77 @@ void process_message(uint8_t* const msg) {
         
       case ACTIVATE_POWERSAFE:
         set_enable_deepsleep();
+        break;
+        
+      case SET_CONFIG_BATT_VOLT_CALIB:
+        if (!mod_cnt) {  
+          // message is for this module -> calc and store in eeprom
+          volt_calib = VOLT_CALIB_DEFAULT; // set volt_calib to default value for reference measurement
+          float adc_volt_default = get_batt_volt_float(); // reference measurement
+          float adc_volt_target = parse_chars_to_word(&msg[MSG_DATA_BEGIN]) / 1000.0;
+          float volt_calib_new = adc_volt_target / adc_volt_default * VOLT_CALIB_DEFAULT;
+          set_config(EEPROM_VOLT_CALIB, &volt_calib_new);
+          load_config_from_eeprom();
+          set_identify_module();
+          // +4 recv target volts
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+4, (adc_volt_default*1000.0)/1);
+          // +4 recv target volts +4 adc reading with default volt_calib
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+8, get_batt_millivolt_uint16());
+          // +4 recv target volts +4 adc reading with default volt_calib +4 adc reading with new volt_calib
+          format_dword_to_chars(&msg[MSG_DATA_BEGIN]+12, volt_calib*1e11);
+        }
+        break;
+        
+      case SET_CONFIG_TEMP1_B_COEFF:
+        if (!mod_cnt) {
+          // message is for this module -> store in eeprom
+          uint8_t temp_before = get_temp1_degC(); // with old temp_b_coeff
+          uint16_t temp_b_coeff_from_msg = parse_chars_to_word(&msg[MSG_DATA_BEGIN]);
+          set_config(EEPROM_TEMP1_B_COEFF, &temp_b_coeff_from_msg);
+          load_config_from_eeprom();
+          set_identify_module();
+          uint8_t temp_after = get_temp1_degC(); // with new temp_b_coeff
+          // +4 recv temp_b_coeff
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+4, temp1_b_coeff);
+          // +4 recv temp_b_coeff +4 confirm temp_b_coeff
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+4+4, temp_before*256+temp_after);
+        }
+        break;
+        
+      case SET_CONFIG_TEMP2_B_COEFF:
+        if (!mod_cnt) {
+          // message is for this module -> store in eeprom
+          uint8_t temp_before = get_temp2_degC(); // with old temp_b_coeff
+          uint16_t temp_b_coeff_from_msg = parse_chars_to_word(&msg[MSG_DATA_BEGIN]);
+          set_config(EEPROM_TEMP2_B_COEFF, &temp_b_coeff_from_msg);
+          load_config_from_eeprom();
+          set_identify_module();
+          uint8_t temp_after = get_temp2_degC(); // with new temp_b_coeff
+          // +4 recv temp_b_coeff
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+4, temp2_b_coeff);
+          // +4 recv temp_b_coeff +4 confirm temp_b_coeff
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+4+4, temp_before*256+temp_after);
+        }
+        break;
+      case CLEAR_CONFIG:
+        if (!mod_cnt) {
+          // message is for this module -> clear data in eeprom
+          clear_config();
+          load_config_from_eeprom();
+          set_identify_module();
+        }
+        // no break, here -> this should give the same output as GET_CONFIG
+      case GET_CONFIG:
+        if (!mod_cnt) {
+          // message is for this module -> store in eeprom
+          //format_word_to_chars(&msg[MSG_DATA_BEGIN], volt_calib*1000000);
+          //format_word_to_chars(&msg[MSG_DATA_BEGIN]+4, (volt_calib*1000000.0 - (uint32_t)(volt_calib*1000000))*1000.0);
+          format_dword_to_chars(&msg[MSG_DATA_BEGIN], volt_calib*1e11);
+          // +8 volt_calib
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+8, temp1_b_coeff);
+          // +8 volt_calib +4 temp1_b_coeff
+          format_word_to_chars(&msg[MSG_DATA_BEGIN]+12, temp2_b_coeff);
+        }
         break;
     }
     

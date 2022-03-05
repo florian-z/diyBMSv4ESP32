@@ -23,6 +23,7 @@
 #include "uart.h"
 #include "steinhart.h"
 #include "eeprom.h"
+#include "process_messages.h"
 
 void setup();
 void loop_test_blinky();
@@ -32,6 +33,7 @@ void loop();
 
 int main(void) {
   setup();
+  load_config_from_eeprom();
   set_identify_module();
   while(1) {
     //loop_test_blinky();
