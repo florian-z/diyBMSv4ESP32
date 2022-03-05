@@ -292,6 +292,6 @@ void process_message(uint8_t* const msg) {
     mod_cnt++;
     format_byte_to_chars(&msg[MSG_MOD_CNT], mod_cnt);
     msg_add_crc_and_end(msg);
-    outgoing_msg(msg, strlen(msg));
+    outgoing_msg(msg, strlen((char*)msg));
   //}  
 }

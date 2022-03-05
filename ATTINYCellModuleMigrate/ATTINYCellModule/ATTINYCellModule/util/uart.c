@@ -24,7 +24,7 @@ static volatile uint8_t rx_data[RX_BUF_LEN] = {0};
 static volatile uint8_t rx_n = 0;
 static volatile uint8_t rx_crc = 0;
 void clear_rx_buffer() {
-  memset(rx_data, 0, RX_BUF_LEN);
+  memset((void*)rx_data, 0, RX_BUF_LEN);
   rx_n = 0;
 }
 
@@ -40,7 +40,7 @@ ISR(USART0_RX_vect) {
   if(UCSR0A & _BV(UPE0)) {
     // parity error
     clear_rx_buffer();
-    const uint8_t data = UDR0;
+    const uint8_t data = UDR0; // dummy read
 
   } else {
     // parity ok
@@ -51,7 +51,7 @@ ISR(USART0_RX_vect) {
       // received msg end, process msg
       LED_BLU_ON
       //incoming_msg(rx_data, rx_n);
-      process_message(rx_data);
+      process_message((uint8_t*) rx_data);
       clear_rx_buffer();
       LED_BLU_OFF
 
@@ -76,7 +76,7 @@ void outgoing_msg(const uint8_t * const msg, uint8_t len) {
   while(UCSR0B & _BV(UDRIE0));
   
   // take next msg
-  memcpy(tx_data, msg, len);
+  memcpy((void*)tx_data, msg, len);
   tx_n = 0;
   tx_len = len;
   UCSR0B |= _BV(UDRIE0) | _BV(TXCIE0); // enable TX0 interrupts
@@ -93,7 +93,7 @@ ISR(USART0_UDRE_vect) {
   if (tx_n == tx_len) {
     // transmit done
     //UCSR0B &= ~_BV(UDRIE0); // disable TX0 interrupt
-    memset(tx_data, 0, TX_BUF_LEN);
+    memset((void*)tx_data, 0, TX_BUF_LEN);
     tx_n = 0;
     tx_len = 0;
   }
