@@ -1,18 +1,7 @@
-/*
- * ATTINYCellModule.c
- *
- * Created: 13.01.2022 22:28:58
- * Author : user
- */ 
 #include "main.h"
-
-//#include <stddef.h>
-//#include <stdio.h>
 
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-
-
 #include <string.h>
 
 //#include <avr/boot.h>
@@ -26,9 +15,6 @@
 #include "process_messages.h"
 
 void setup();
-void loop_test_blinky();
-void loop_test_uart();
-void loop_test_adc();
 void loop();
 
 int main(void) {
@@ -36,9 +22,6 @@ int main(void) {
   load_config_from_eeprom();
   set_identify_module();
   while(1) {
-    //loop_test_blinky();
-	  //loop_test_uart();
-	  //loop_test_adc();
     loop();
   }
 }
@@ -92,45 +75,6 @@ void setup() {
   __builtin_avr_sei();
 }
 
-//void loop_test_blinky() {
-  //_delay_ms(4000);
-  //LED_BLU_ON
-  //_delay_ms(4000);
-  //REFVOLT_ON
-  //_delay_ms(4000);
-  //SET_TX
-  //_delay_ms(4000);
-  //if(READ_RX) {
-    //LED_RED_ON
-  //}
-  //_delay_ms(4000);
-//
-  //LED_BLU_OFF
-  //CLR_TX
-  //REFVOLT_OFF
-  //_delay_ms(1);
-  //if(!READ_RX) {
-    //LED_RED_OFF;
-  //}
-  //_delay_ms(1000);
-//}
-//
-//void loop_test_uart() {
-	//LED_BLU_ON
-	//send_tx0("test1 ... ");
-	//_delay_ms(500);
-	//send_tx0("test2\n");
-	//LED_BLU_OFF
-	//_delay_ms(500);
-	//LED_RED_ON
-	//LED_BLU_ON
-	//send_tx0("test3 ... ");
-	//_delay_ms(500);
-	//send_tx0("test4\n");
-	//LED_BLU_OFF
-	//_delay_ms(500);
-	//LED_RED_OFF
-//}
 
 ISR(BADISR_vect) {
   while(1) {
@@ -143,45 +87,6 @@ ISR(BADISR_vect) {
   }
 }
 
-// printf %f needs linker library printf_flt (huge size)
-//void loop_test_adc() {
-  //
-  //for(uint8_t i=0; i<4;i++) {
-    ////LED_RED_ON
-    //float adc_result = read_adc_channel_multiple(i, 10);
-    ////float adc_result = read_adc_channel(i); 
-    ////LED_RED_OFF
-//
-	  //// ADC = Vin * 1024 / Vref
-	  //float volt_calib = 1.25 / 1023.0; // 0x03FF is VREF minus one LSB
-	  //float voltage = adc_result * volt_calib;
-    //
-	  //if(BATT == i) {
-  	  //voltage *= 3.5185185;
-	  //}
-  //
-    //char data[100] = {0};
-    //if(AREF == i || BATT == i) {
-	    //snprintf(data, 100, "%d %.2f %.3fV\n", i, adc_result, voltage);
-    //} else {
-      //snprintf(data, 100, "%d %.2f %.3fV %dC\n", i, adc_result, voltage, thermistorToCelcius(3950, adc_result));
-    //}
-    ////send_tx0(data);
-    //outgoing_msg(data, strlen(data));
-  //}
-  //deinit_adc();
-  ////send_tx0("\n");
-  //
-  //_delay_ms(1000);
-  //
-  ////set_config(VOLT_CALIB, 1234);
-  ////_delay_ms(1000);
-  //char data[100] = {0};
-  //snprintf(data, 100, "EEPROM %f\n", get_config_voltcalib());
-  ////send_tx0(data);
-  //outgoing_msg(data, strlen(data));
-  ////_delay_ms(1000);
-//}
 
 #include <string.h>
 
@@ -216,6 +121,8 @@ void set_processing_start() {
 void set_processing_done() {
   flag_processing_done = 1;
 }
+
+
 
 
 void go_sleep_idle();
