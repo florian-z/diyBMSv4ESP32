@@ -2,15 +2,15 @@
 #include "main.h"
 
 int8_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc) {
-//The thermistor is connected in series with another 47k resistor
-//and across the 2.048V reference giving 50:50 weighting
+  //The thermistor is connected in series with another 47k resistor
+  //and across the 2.048V reference giving 50:50 weighting
 
-//We can calculate the  Steinhart-Hart Thermistor Equation based on the B Coefficient of the thermistor
-// at 25 degrees C rating
-#define NOMINAL_TEMPERATURE 25
+  //We can calculate the  Steinhart-Hart Thermistor Equation based on the B Coefficient of the thermistor
+  // at 25 degrees C rating
+  #define NOMINAL_TEMPERATURE 25
 
-//If we get zero its likely the ADC is connected to ground
- if (raw_adc>0){
+  //If we get zero its likely the ADC is connected to ground
+  if (raw_adc>0){
     //47000 = resistor value
     //https://arduinodiy.wordpress.com/2015/11/10/measuring-temperature-with-ntc-the-steinhart-hart-formula/
     //float Resistance = 47000.0 * (1023.0F/(float)RawADC - 1.0);
@@ -25,23 +25,12 @@ int8_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc) {
     steinhart = 1.0 / steinhart; // Invert
     steinhart -= 273.15; // convert to oC
 
-    return (int16_t)steinhart;
+    return (int8_t)steinhart;
 
     //Temp = log(Temp);
     //Temperature in Kelvin = 1 / {A + B[ln(R)] + C[ln(R)]^3}
     //Temp = 1.0 / (A + (B*Temp) + (C * Temp * Temp * Temp ));
- }
+  }
 
- return (int8_t)-99;
-}
-
-//This function reduces the scale of temperatures from int16_t type to a single byte (unsigned)
-//We have an artifical floor at 40oC, anything below +40 is considered negative (below freezing)
-//Gives range of -40 to +216 degrees C
-uint8_t temperatureToByte(int16_t tempInCelcius) {
-  tempInCelcius += 40;
-  //Set the limits and convert from signed to unsigned
-  if (tempInCelcius < 0) tempInCelcius = 0;
-  if (tempInCelcius > 255) tempInCelcius = 255;
-  return (uint8_t)tempInCelcius;
+  return (int8_t)-99;
 }

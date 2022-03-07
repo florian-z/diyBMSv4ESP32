@@ -104,17 +104,6 @@ void format_dword_to_chars(uint8_t* bytes, const uint32_t data) {
   bytes[6] = ((data%256)/16)+'0';
   bytes[7] = (data%16)+'0';
 }
-//void format_short_to_word(uint8_t* bytes, uint16_t shortval) {
-  //bytes[0] = (shortval/1000)<<4 | (shortval%1000)/100;
-  //bytes[1] = ((shortval%100)/10)<<4 | shortval%10;
-//}
-//uint16_t format_word_to_short( uint8_t* bytes) {
-  //uint16_t shortval = (bytes[0]>>4)*1000;
-  //shortval += (bytes[0]&0x0F)*100;
-  //shortval += (bytes[1]>>4)*10;
-  //shortval += (bytes[1]&0x0F);
-  //return shortval;
-//}
 
 uint8_t calc_crc(const uint8_t* msg) {
   uint8_t crc = 0;
