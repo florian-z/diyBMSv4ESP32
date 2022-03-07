@@ -197,6 +197,7 @@ void process_message() {
     uint8_t command = parse_chars_to_byte(&msg[MSG_CMD]);
     uint8_t mod_cnt = parse_chars_to_byte(&msg[MSG_MOD_CNT]);
     switch(command) {
+      
       case GET_BATT_VOLT:
         // append value and send
         format_word_to_chars(&msg[MSG_DATA_BEGIN]+mod_cnt*4, get_batt_millivolt_uint16());
@@ -223,7 +224,7 @@ void process_message() {
         break;
         
       case SET_CONFIG_BATT_VOLT_CALIB:
-        if (!mod_cnt) {  
+        if (!mod_cnt && strlen((char*)msg)==9) {
           // message is for this module -> calc and store in eeprom
           volt_calib = VOLT_CALIB_DEFAULT; // set volt_calib to default value for reference measurement
           float adc_volt_default = get_batt_volt_float(); // reference measurement
@@ -242,7 +243,7 @@ void process_message() {
         break;
         
       case SET_CONFIG_TEMP1_B_COEFF:
-        if (!mod_cnt) {
+        if (!mod_cnt && strlen((char*)msg)==9) {
           // message is for this module -> store in eeprom
           uint8_t temp_before = get_temp1_degC(); // with old temp_b_coeff
           uint16_t temp_b_coeff_from_msg = parse_chars_to_word(&msg[MSG_DATA_BEGIN]);
@@ -258,7 +259,7 @@ void process_message() {
         break;
         
       case SET_CONFIG_TEMP2_B_COEFF:
-        if (!mod_cnt) {
+        if (!mod_cnt && strlen((char*)msg)==9) {
           // message is for this module -> store in eeprom
           uint8_t temp_before = get_temp2_degC(); // with old temp_b_coeff
           uint16_t temp_b_coeff_from_msg = parse_chars_to_word(&msg[MSG_DATA_BEGIN]);
@@ -272,6 +273,7 @@ void process_message() {
           format_word_to_chars(&msg[MSG_DATA_BEGIN]+4+4, temp_before*256+temp_after);
         }
         break;
+        
       case CLEAR_CONFIG:
         if (!mod_cnt) {
           // message is for this module -> clear data in eeprom
