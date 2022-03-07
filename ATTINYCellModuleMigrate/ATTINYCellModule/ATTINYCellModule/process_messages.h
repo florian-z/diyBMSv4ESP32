@@ -22,6 +22,8 @@ typedef enum msg_command { GET_BATT_VOLT=0, GET_TEMP=1, IDENTIFY_MODULE=2, ACTIV
 void load_config_from_eeprom();
 uint8_t calc_crc(const uint8_t* msg);
 bool is_msg_syntax_valid(const uint8_t* const msg);
-void process_message(uint8_t* const msg);
+
+void incoming_msg(const uint8_t * const msg, const uint8_t len);
+void process_message();
 
 #endif

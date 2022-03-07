@@ -18,13 +18,12 @@ void send_tx0(const uint8_t* string) {
 
 
 
-#define RX_BUF_LEN 100
-#define TX_BUF_LEN 100
+#define RX_BUF_LEN MSG_LEN
+#define TX_BUF_LEN MSG_LEN
 static volatile uint8_t rx_data[RX_BUF_LEN] = {0};
 static volatile uint8_t rx_n = 0;
-static volatile uint8_t rx_crc = 0;
 void clear_rx_buffer() {
-  memset((void*)rx_data, 0, RX_BUF_LEN);
+  memset((void*)rx_data, '\0', RX_BUF_LEN);
   rx_n = 0;
 }
 
@@ -50,8 +49,7 @@ ISR(USART0_RX_vect) {
     if (MSG_END == data) {
       // received msg end, process msg
       LED_BLU_ON
-      //incoming_msg(rx_data, rx_n);
-      process_message((uint8_t*) rx_data);
+      incoming_msg((uint8_t*) rx_data, rx_n);
       clear_rx_buffer();
       LED_BLU_OFF
 
@@ -93,7 +91,7 @@ ISR(USART0_UDRE_vect) {
   if (tx_n == tx_len) {
     // transmit done
     //UCSR0B &= ~_BV(UDRIE0); // disable TX0 interrupt
-    memset((void*)tx_data, 0, TX_BUF_LEN);
+    memset((void*)tx_data, '\0', TX_BUF_LEN);
     tx_n = 0;
     tx_len = 0;
   }

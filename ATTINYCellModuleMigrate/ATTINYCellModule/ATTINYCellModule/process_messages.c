@@ -36,6 +36,7 @@ void load_config_from_eeprom() {
   }
 }
 
+/** Read sensors */
 uint16_t get_batt_millivolt_uint16() {
   float adc_result = read_adc_channel_multiple(BATT, 10);
   // ADC = Vin * 1024 / Vref
@@ -71,6 +72,7 @@ uint8_t get_temp2_degC() {
   return (uint8_t) thermistorToCelcius(temp2_b_coeff, adc_result);
 }
 
+/** Decode / Encode bytes */
 uint8_t parse_chars_to_byte(const uint8_t* bytes) {
   uint8_t result = (bytes[0]-'0') * 16;
   result += bytes[1]-'0';
@@ -105,6 +107,7 @@ void format_dword_to_chars(uint8_t* bytes, const uint32_t data) {
   bytes[7] = (data%16)+'0';
 }
 
+/** MSG tools */
 uint8_t calc_crc(const uint8_t* msg) {
   uint8_t crc = 0;
   if(MSG_START == *msg) {
@@ -155,8 +158,21 @@ bool is_msg_syntax_valid(const uint8_t* const msg) {
   return true;
 }
 
-void process_message(uint8_t* const msg) {
-  //if(new_msg_in) {
+
+
+/** store and process message */
+#define MSG_IN_LEN MSG_LEN
+static uint8_t msg[MSG_IN_LEN] = {0};
+static bool new_msg = false;
+
+void incoming_msg(const uint8_t * const msg_in, const uint8_t len) {
+  memcpy(msg, msg_in, len);
+  new_msg = true;
+}
+
+void process_message() {
+  if(new_msg) {
+    new_msg = false;
     if(!is_msg_syntax_valid(msg)) {
       // message has invalid syntax or crc
       LED_RED_ON
@@ -164,6 +180,8 @@ void process_message(uint8_t* const msg) {
       return;
     }
     // message has valid syntax and crc
+    
+    set_disable_deepsleep(); // reception of a valid message will disable deepsleep
     
     // clear MSG_CRC, <crc> and MSG_END
     uint8_t* ptr = msg;
@@ -174,8 +192,6 @@ void process_message(uint8_t* const msg) {
       *ptr++ = '\0'; // <crc2>
       *ptr = '\0';   //'\n'
     }
-
-    set_disable_deepsleep();
 
     // process message
     uint8_t command = parse_chars_to_byte(&msg[MSG_CMD]);
@@ -282,5 +298,6 @@ void process_message(uint8_t* const msg) {
     format_byte_to_chars(&msg[MSG_MOD_CNT], mod_cnt);
     msg_add_crc_and_end(msg);
     outgoing_msg(msg, strlen((char*)msg));
-  //}  
+    memset(msg, '\0', MSG_IN_LEN);
+  }  
 }

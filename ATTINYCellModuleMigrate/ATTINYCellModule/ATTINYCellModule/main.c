@@ -88,19 +88,6 @@ ISR(BADISR_vect) {
 }
 
 
-#include <string.h>
-
-#define MSG_IN_LEN 10
-static uint8_t msg_in[MSG_IN_LEN] = {0};
-static bool new_msg_in = false;
-
-void incoming_msg(const uint8_t * const msg, const uint8_t len) {
-  memcpy(msg_in, msg, len);
-  new_msg_in = true;
-
-  // todo remove
-  outgoing_msg(msg, len);
-}
 
 static uint8_t flag_identify_module = 0;
 static uint8_t flag_go_deepsleep = 0;
@@ -130,6 +117,8 @@ void go_sleep_powerdown();
 
 void loop() {
   __builtin_avr_wdr();
+  process_message();
+  
   if(flag_identify_module) {
     flag_identify_module--;
     LED_RED_ON
