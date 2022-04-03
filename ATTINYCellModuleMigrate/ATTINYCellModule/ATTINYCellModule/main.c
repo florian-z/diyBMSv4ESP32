@@ -118,8 +118,10 @@ void go_sleep_idle();
 void go_sleep_powerdown();
 
 void loop() {
+  // when flag_go_deepsleep is set, this will be called only for incoming data and at watchdog interval
   __builtin_avr_wdr();
   process_message();
+  WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
   
   if(flag_identify_module) {
     flag_identify_module--;
@@ -189,7 +191,4 @@ void go_sleep_powerdown() {
 
 /* Watchdog Time-out Interrupt */
 ISR(WDT_vect) {
-  static uint8_t red_on = 0;
-  WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
-  if (!red_on) { LED_RED_ON; red_on=1; } else { LED_RED_OFF; red_on=0; }
 }
