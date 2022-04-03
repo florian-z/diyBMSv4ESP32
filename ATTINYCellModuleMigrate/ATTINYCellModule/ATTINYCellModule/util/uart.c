@@ -73,6 +73,9 @@ void outgoing_msg(const uint8_t * const msg, uint8_t len) {
   // wait for ongoing transmission to finish, if any
   while(UCSR0B & _BV(UDRIE0));
   
+  // enable TX0
+  UCSR0B |= _BV(TXEN0);
+  
   // take next msg
   memcpy((void*)tx_data, msg, len);
   tx_n = 0;
@@ -100,5 +103,6 @@ ISR(USART0_UDRE_vect) {
 /* USART0, Tx Complete */
 ISR(USART0_TX_vect) {
   UCSR0B &= ~_BV(TXCIE0); // disable TX0 TransferComplete interrupt
+  UCSR0B &= ~_BV(TXEN0); // disable TX0
   set_processing_done();
 }

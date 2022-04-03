@@ -62,6 +62,7 @@ void setup() {
   // config UART0
   //UCSR0A = 0x00; // default: ensure double-speed-off and multi-processor-mode-off
   UCSR0B = _BV(TXEN0) | _BV(RXEN0) | _BV(RXCIE0); // non default: TXCIE0 RXCIE0 TXEN0 RXEN0 UDRIE0
+  UCSR0B &= ~_BV(TXEN0); // start with TX0 disabled to conserve power
   UCSR0C = _BV(UCSZ00) | _BV(UCSZ01) | _BV(UPM01); // default: async, 8E1
   
   // todo: // wake up mcu from all sleep modes on incoming RX-data
