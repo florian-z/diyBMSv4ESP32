@@ -311,28 +311,28 @@ void process_message() {
 }
 
 
-/** test program */
-void proc_msg_test() {
-  //get_batt_volt_float();
-  format_word_to_chars(&msg[0], get_batt_millivolt_uint16());
-  msg[1*4] = ' ';
-  //get_temp1_degC();
-  //get_temp2_degC();
-  format_word_to_chars(&msg[0]+1*4+1, get_temp1_degC()*256+get_temp2_degC());
-  //msg[2*4+1] = ' ';
-  
-  msg[2*4+1] = '\n';
-  outgoing_msg(msg, strlen((char*)msg));
-  memset(msg, '\0', MSG_IN_LEN);
-  
-  
-  for(uint8_t i = 0; i<17; i++) {
-    format_byte_to_chars(&msg[0], i);
-    
-    msg[2] = parse_chars_to_byte(msg);
-    msg[3] = '\n';
-    
-    outgoing_msg(msg, strlen((char*)msg));
-    memset(msg, '\0', MSG_IN_LEN);
-  }    
-}
+///** test program */
+//void proc_msg_test() {
+  ////get_batt_volt_float();
+  //format_word_to_chars(&msg[0], get_batt_millivolt_uint16());
+  //msg[1*4] = ' ';
+  ////get_temp1_degC();
+  ////get_temp2_degC();
+  //format_word_to_chars(&msg[0]+1*4+1, get_temp1_degC()*256+get_temp2_degC());
+  ////msg[2*4+1] = ' ';
+  //
+  //msg[2*4+1] = '\n';
+  //outgoing_msg(msg, strlen((char*)msg));
+  //memset(msg, '\0', MSG_IN_LEN);
+  //
+  //
+  //for(uint8_t i = 0; i<17; i++) {
+    //format_byte_to_chars(&msg[0], i);
+    //
+    //msg[2] = parse_chars_to_byte(msg);
+    //msg[3] = '\n';
+    //
+    //outgoing_msg(msg, strlen((char*)msg));
+    //memset(msg, '\0', MSG_IN_LEN);
+  //}    
+//}

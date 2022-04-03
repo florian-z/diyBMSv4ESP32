@@ -16,15 +16,15 @@
 
 void setup();
 void loop();
-void test_loop();
+//void test_loop();
 
 int main(void) {
   setup();
   load_config_from_eeprom();
   set_identify_module();
   while(1) {
-    //loop();
-    test_loop();
+    loop();
+    //test_loop();
   }
 }
 
@@ -59,19 +59,19 @@ void setup() {
   //Set the extra high sink capability of pin PA7 is enabled.
   //PHDE |= _BV(PHDEA1);
   
-  //// config UART0
-  ////UCSR0A = 0x00; // default: ensure double-speed-off and multi-processor-mode-off
-  //UCSR0B = _BV(TXEN0) | _BV(RXEN0) | _BV(RXCIE0); // non default: TXCIE0 RXCIE0 TXEN0 RXEN0 UDRIE0
-  //UCSR0C = _BV(UCSZ00) | _BV(UCSZ01) | _BV(UPM01); // default: async, 8E1
-  //
-  //// todo: // wake up mcu from all sleep modes on incoming RX-data
-  //// note: UCSR0D = UCSR0D | _BV(RXS0); // needs to be cleared by writing a logical one
-  //UCSR0D = _BV(RXSIE0) | _BV(SFDE0); // non-default: RXSIE0, SFDE0
-  //
-  //
-  //
-  //// set baudrate
-  //UBRR0L = 12; // 9600 baud @ 2MHz
+  // config UART0
+  //UCSR0A = 0x00; // default: ensure double-speed-off and multi-processor-mode-off
+  UCSR0B = _BV(TXEN0) | _BV(RXEN0) | _BV(RXCIE0); // non default: TXCIE0 RXCIE0 TXEN0 RXEN0 UDRIE0
+  UCSR0C = _BV(UCSZ00) | _BV(UCSZ01) | _BV(UPM01); // default: async, 8E1
+  
+  // todo: // wake up mcu from all sleep modes on incoming RX-data
+  // note: UCSR0D = UCSR0D | _BV(RXS0); // needs to be cleared by writing a logical one
+  UCSR0D = _BV(RXSIE0) | _BV(SFDE0); // non-default: RXSIE0, SFDE0
+  
+  
+  
+  // set baudrate
+  UBRR0L = 12; // 9600 baud @ 2MHz
   
   __builtin_avr_wdr();
   __builtin_avr_sei();
@@ -140,36 +140,36 @@ void loop() {
   }
 }
 
-void test_loop() {
-  __builtin_avr_wdr();
-  //go_sleep_idle();
-  //static uint8_t blu_on = 0;
-  //if (!blu_on) { LED_BLU_ON; blu_on=1; _delay_ms(50); } else { LED_BLU_OFF; blu_on=0; _delay_ms(50); }
-  __builtin_avr_wdr();
-  _delay_ms(2000);
-  LED_RED_ON
-  __builtin_avr_wdr();
-  _delay_ms(2000);
-  LED_BLU_ON
-  __builtin_avr_wdr();
-  _delay_ms(2000);
-  REFVOLT_ON
-  __builtin_avr_wdr();
-  _delay_ms(2000);
-  if(!READ_RX) {
-    LED_RED_OFF
-  }
-  _delay_ms(1);
-  SET_TX
-  _delay_ms(1);
-  if(READ_RX) {
-    LED_BLU_OFF
-  }
-  _delay_ms(2000);
-  CLR_TX
-  _delay_ms(2000);
-  //proc_msg_test();
-}
+//void test_loop() {
+  //__builtin_avr_wdr();
+  ////go_sleep_idle();
+  ////static uint8_t blu_on = 0;
+  ////if (!blu_on) { LED_BLU_ON; blu_on=1; _delay_ms(50); } else { LED_BLU_OFF; blu_on=0; _delay_ms(50); }
+  //__builtin_avr_wdr();
+  //_delay_ms(2000);
+  //LED_RED_ON
+  //__builtin_avr_wdr();
+  //_delay_ms(2000);
+  //LED_BLU_ON
+  //__builtin_avr_wdr();
+  //_delay_ms(2000);
+  //REFVOLT_ON
+  //__builtin_avr_wdr();
+  //_delay_ms(2000);
+  //if(!READ_RX) {
+    //LED_RED_OFF
+  //}
+  //_delay_ms(1);
+  //SET_TX
+  //_delay_ms(1);
+  //if(READ_RX) {
+    //LED_BLU_OFF
+  //}
+  //_delay_ms(2000);
+  //CLR_TX
+  //_delay_ms(2000);
+  ////proc_msg_test();
+//}
 
 void go_sleep_idle() {
   deinit_adc();
