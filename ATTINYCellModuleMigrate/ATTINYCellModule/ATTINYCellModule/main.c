@@ -16,13 +16,15 @@
 
 void setup();
 void loop();
+void test_loop();
 
 int main(void) {
   setup();
   load_config_from_eeprom();
   set_identify_module();
   while(1) {
-    loop();
+    //loop();
+    test_loop();
   }
 }
 
@@ -138,6 +140,29 @@ void loop() {
   }
 }
 
+void test_loop() {
+  __builtin_avr_wdr();
+  //go_sleep_idle();
+  //static uint8_t blu_on = 0;
+  //if (!blu_on) { LED_BLU_ON; blu_on=1; _delay_ms(50); } else { LED_BLU_OFF; blu_on=0; _delay_ms(50); }
+  __builtin_avr_wdr();
+  _delay_ms(1000);
+  LED_RED_ON
+  __builtin_avr_wdr();
+  _delay_ms(1000);
+  LED_BLU_ON
+  __builtin_avr_wdr();
+  _delay_ms(1000);
+  REFVOLT_ON
+  __builtin_avr_wdr();
+  _delay_ms(1000);
+  proc_msg_test();
+  __builtin_avr_wdr();
+  _delay_ms(2000);
+  __builtin_avr_wdr();
+  _delay_ms(2000);
+}
+
 void go_sleep_idle() {
   deinit_adc();
   LED_RED_OFF
@@ -156,5 +181,7 @@ void go_sleep_powerdown() {
 
 /* Watchdog Time-out Interrupt */
 ISR(WDT_vect) {
+  static uint8_t red_on = 0;
   WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
+  if (!red_on) { LED_RED_ON; red_on=1; } else { LED_RED_OFF; red_on=0; }
 }

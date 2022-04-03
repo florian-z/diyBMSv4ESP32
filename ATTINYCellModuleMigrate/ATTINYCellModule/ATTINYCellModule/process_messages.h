@@ -25,5 +25,6 @@ bool is_msg_syntax_valid(const uint8_t* const msg);
 
 void incoming_msg(const uint8_t * const msg, const uint8_t len);
 void process_message();
+void proc_msg_test();
 
 #endif
