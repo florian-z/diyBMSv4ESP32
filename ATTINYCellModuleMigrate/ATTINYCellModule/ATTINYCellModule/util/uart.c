@@ -51,7 +51,6 @@ ISR(USART0_RX_vect) {
       LED_BLU_ON
       incoming_msg((uint8_t*) rx_data, rx_n);
       clear_rx_buffer();
-      LED_BLU_OFF
 
     } else if(MSG_START == data) {
       // received msg start, start over

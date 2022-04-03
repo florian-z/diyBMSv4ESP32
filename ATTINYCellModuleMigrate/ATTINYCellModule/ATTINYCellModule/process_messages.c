@@ -190,12 +190,13 @@ void process_message() {
     set_disable_deepsleep(); // reception of a valid message will disable deepsleep
     
     // clear MSG_CRC, <crc> and MSG_END
-    uint8_t* ptr = msg;
-    while(MSG_CRC != *++ptr);
     {
+      uint8_t* ptr = msg;
+      while(MSG_CRC != *++ptr);
       *ptr++ = '\0'; // '*'
       *ptr++ = '\0'; // <crc1>
       *ptr++ = '\0'; // <crc2>
+      *ptr++ = '\0'; //'\r'
       *ptr = '\0';   //'\n'
     }
 
@@ -225,7 +226,8 @@ void process_message() {
         }
         break;
         
-      case ACTIVATE_POWERSAFE:
+      case ACTIVATE_POWERSAVE:
+        LED_RED_OFF // TODO flo
         set_enable_deepsleep();
         break;
         

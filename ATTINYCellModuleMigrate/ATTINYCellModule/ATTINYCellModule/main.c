@@ -176,18 +176,16 @@ void loop() {
 
 void go_sleep_idle() {
   deinit_adc();
-  LED_RED_OFF
-  LED_BLU_ON
-  pwrmgmt_sleep_idle();
+  //LED_RED_OFF // TODO flo
   LED_BLU_OFF
+  pwrmgmt_sleep_idle();
 }
 
 void go_sleep_powerdown() {
   deinit_adc();
-  LED_RED_ON
+  //LED_RED_OFF // TODO flo
   LED_BLU_OFF
   pwrmgmt_sleep_standby(); // oscillator will keep running, otherwise mcu startup is too slow to get the next incoming message
-  LED_RED_OFF
 }
 
 /* Watchdog Time-out Interrupt */
