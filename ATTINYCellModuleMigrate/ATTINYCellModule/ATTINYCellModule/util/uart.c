@@ -1,7 +1,7 @@
 #include "uart.h"
-#include "main.h"
+#include "../main.h"
 #include <string.h>
-#include "process_messages.h"
+#include "../process_messages.h"
 
 void putc_tx0(const uint8_t singlebyte) {
 	while(!(UCSR0A & _BV(UDRE0)));

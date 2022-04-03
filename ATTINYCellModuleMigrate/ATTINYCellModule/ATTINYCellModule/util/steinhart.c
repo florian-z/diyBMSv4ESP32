@@ -1,5 +1,5 @@
 #include "steinhart.h"
-#include "main.h"
+#include "../main.h"
 
 int8_t thermistorToCelcius(const uint16_t b_coeff, const uint16_t raw_adc) {
   //The thermistor is connected in series with another 47k resistor

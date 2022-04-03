@@ -1,9 +1,9 @@
 #include "process_messages.h"
 #include "main.h"
-#include "eeprom.h"
-#include "adc.h"
-#include "steinhart.h"
-#include "uart.h"
+#include "util/eeprom.h"
+#include "util/adc.h"
+#include "util/steinhart.h"
+#include "util/uart.h"
 #include <string.h>
 
 /** Read config from EEPROM - Only overwrite default config values, if EEPROM is not all zero bytes */

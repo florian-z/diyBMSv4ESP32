@@ -1,5 +1,5 @@
 #include "adc.h"
-#include "main.h"
+#include "../main.h"
 #include "pwrmgmt.h"
 
 

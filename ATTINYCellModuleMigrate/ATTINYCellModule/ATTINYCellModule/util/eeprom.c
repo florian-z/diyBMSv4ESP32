@@ -1,5 +1,5 @@
 #include "eeprom.h"
-#include "main.h"
+#include "../main.h"
 #include <avr/eeprom.h>
 
 static EEMEM float volt_calib;

@@ -7,11 +7,11 @@
 //#include <avr/boot.h>
 //USING CLOCKWISE PIN MAPPINGS
 
-#include "adc.h"
-#include "pwrmgmt.h"
-#include "uart.h"
-#include "steinhart.h"
-#include "eeprom.h"
+#include "util/adc.h"
+#include "util/pwrmgmt.h"
+#include "util/uart.h"
+#include "util/steinhart.h"
+#include "util/eeprom.h"
 #include "process_messages.h"
 
 void setup();

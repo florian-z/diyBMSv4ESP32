@@ -1,5 +1,5 @@
 #include "pwrmgmt.h"
-#include "main.h"
+#include "../main.h"
 
 /*
  * RUN
