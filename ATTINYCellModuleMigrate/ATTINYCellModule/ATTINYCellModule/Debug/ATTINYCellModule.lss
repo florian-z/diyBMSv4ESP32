@@ -353,7 +353,6 @@ void set_processing_done() {
 void go_sleep_idle() {
   deinit_adc();
      1a2:	8d d3       	rcall	.+1818   	; 0x8be <deinit_adc>
-  //LED_RED_OFF // TODO flo debug enable
   LED_BLU_OFF
      1a4:	8b b3       	in	r24, 0x1b	; 27
      1a6:	8f 7b       	andi	r24, 0xBF	; 191
@@ -368,12 +367,10 @@ void go_sleep_idle() {
 void go_sleep_powerdown() {
   deinit_adc();
      1ae:	87 d3       	rcall	.+1806   	; 0x8be <deinit_adc>
-  //LED_RED_OFF // TODO flo debug enable
   LED_BLU_OFF
      1b0:	8b b3       	in	r24, 0x1b	; 27
      1b2:	8f 7b       	andi	r24, 0xBF	; 191
      1b4:	8b bb       	out	0x1b, r24	; 27
-  //LED_RED_ON // TODO flo debug remove
   pwrmgmt_sleep_standby(); // oscillator will keep running, otherwise mcu startup is too slow to get the next incoming message
      1b6:	4e d4       	rcall	.+2204   	; 0xa54 <pwrmgmt_sleep_standby>
      1b8:	08 95       	ret
@@ -438,7 +435,7 @@ void loop() {
      20c:	29 f0       	breq	.+10     	; 0x218 <__DATA_REGION_LENGTH__+0x18>
       go_sleep_powerdown();
      20e:	cf df       	rcall	.-98     	; 0x1ae <go_sleep_powerdown>
-      LED_RED_OFF
+      LED_RED_OFF // clear error indicator on deep-sleep-command
      210:	88 b3       	in	r24, 0x18	; 24
      212:	8b 7f       	andi	r24, 0xFB	; 251
      214:	88 bb       	out	0x18, r24	; 24
@@ -471,7 +468,7 @@ int main(void) {
      228:	fe cf       	rjmp	.-4      	; 0x226 <main+0x6>
 
 0000022a <__vector_4>:
-  //LED_RED_ON // TODO flo debug remove
+  LED_BLU_OFF
   pwrmgmt_sleep_standby(); // oscillator will keep running, otherwise mcu startup is too slow to get the next incoming message
 }
 
