@@ -4,3 +4,15 @@
 
 main.c
 
+process_messages.c
+
+util\adc.c
+
+util\eeprom.c
+
+util\pwrmgmt.c
+
+util\steinhart.c
+
+util\uart.c
+

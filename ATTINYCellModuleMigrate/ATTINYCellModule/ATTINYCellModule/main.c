@@ -14,6 +14,8 @@
 #include "util/eeprom.h"
 #include "process_messages.h"
 
+#define MAINTAIN_WATCHDOG do { __builtin_avr_wdr(); WDTCSR |= _BV(WDIE); } while(0);
+
 void setup();
 void loop();
 //void test_loop();
@@ -30,7 +32,8 @@ int main(void) {
 
 void setup() {
   wdt_enable(WDTO_8S);
-  WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
+  //WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
+  WDTCSR |= _BV(WDIE) |_BV(WDE); // execute Watchdog interrupt instead of reset, WDIE needs to be set again everytime, otherwise a reset will be done
   
   /* 
    * Boot up will be in 1Mhz CKDIV8 mode from external 8MHz crystal. Swap to /4 to change speed to 2Mhz.
@@ -73,7 +76,7 @@ void setup() {
   // set baudrate
   UBRR0L = 12; // 9600 baud @ 2MHz
   
-  __builtin_avr_wdr();
+  MAINTAIN_WATCHDOG;
   __builtin_avr_sei();
 }
 
@@ -119,7 +122,7 @@ void go_sleep_powerdown();
 
 void loop() {
   // when flag_go_deepsleep is set, this will be called only for incoming data and at watchdog interval
-  __builtin_avr_wdr();
+  MAINTAIN_WATCHDOG;
   process_message();
   WDTCSR |= _BV(WDIE); // execute Watchdog interrupt instead of reset
   
@@ -144,20 +147,20 @@ void loop() {
 }
 
 //void test_loop() {
-  //__builtin_avr_wdr();
+  //MAINTAIN_WATCHDOG;
   ////go_sleep_idle();
   ////static uint8_t blu_on = 0;
   ////if (!blu_on) { LED_BLU_ON; blu_on=1; _delay_ms(50); } else { LED_BLU_OFF; blu_on=0; _delay_ms(50); }
-  //__builtin_avr_wdr();
+  //MAINTAIN_WATCHDOG;
   //_delay_ms(2000);
   //LED_RED_ON
-  //__builtin_avr_wdr();
+  //MAINTAIN_WATCHDOG;
   //_delay_ms(2000);
   //LED_BLU_ON
-  //__builtin_avr_wdr();
+  //MAINTAIN_WATCHDOG;
   //_delay_ms(2000);
   //REFVOLT_ON
-  //__builtin_avr_wdr();
+  //MAINTAIN_WATCHDOG;
   //_delay_ms(2000);
   //if(!READ_RX) {
     //LED_RED_OFF
