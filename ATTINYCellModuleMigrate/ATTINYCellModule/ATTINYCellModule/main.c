@@ -65,7 +65,6 @@ void setup() {
   UCSR0B &= ~_BV(TXEN0); // start with TX0 disabled to conserve power
   UCSR0C = _BV(UCSZ00) | _BV(UCSZ01) | _BV(UPM01); // default: async, 8E1
   
-  // todo: // wake up mcu from all sleep modes on incoming RX-data
   // note: UCSR0D = UCSR0D | _BV(RXS0); // needs to be cleared by writing a logical one
   UCSR0D = _BV(RXSIE0) | _BV(SFDE0); // non-default: RXSIE0, SFDE0
   
@@ -135,6 +134,7 @@ void loop() {
   } else if (flag_processing_done) {
     if (flag_go_deepsleep) {
       go_sleep_powerdown();
+      LED_RED_OFF // clear error indicator on deep-sleep-command
     } else {
       go_sleep_idle();
     }
@@ -176,19 +176,17 @@ void loop() {
 
 void go_sleep_idle() {
   deinit_adc();
-  //LED_RED_OFF // TODO flo
   LED_BLU_OFF
   pwrmgmt_sleep_idle();
 }
 
 void go_sleep_powerdown() {
   deinit_adc();
-  //LED_RED_OFF // TODO flo
   LED_BLU_OFF
   pwrmgmt_sleep_standby(); // oscillator will keep running, otherwise mcu startup is too slow to get the next incoming message
 }
 
 /* Watchdog Time-out Interrupt */
 ISR(WDT_vect) {
-  //LED_BLU_ON // very short Watchdog blip
+  LED_BLU_ON // very short Watchdog blip
 }

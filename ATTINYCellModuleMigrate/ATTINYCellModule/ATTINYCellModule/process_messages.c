@@ -292,7 +292,7 @@ void process_message() {
         // no break, here -> this should give the same output as GET_CONFIG
       case GET_CONFIG:
         if (!mod_cnt) {
-          // message is for this module -> store in eeprom
+          // message is for this module -> give current settings
           //format_word_to_chars(&msg[MSG_DATA_BEGIN], volt_calib*1000000);
           //format_word_to_chars(&msg[MSG_DATA_BEGIN]+4, (volt_calib*1000000.0 - (uint32_t)(volt_calib*1000000))*1000.0);
           format_dword_to_chars(&msg[MSG_DATA_BEGIN], volt_calib*1e11);
